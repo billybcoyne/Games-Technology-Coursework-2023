@@ -11,6 +11,13 @@
 #include "BoundingSphere.h"
 #include "GUILabel.h"
 #include "Explosion.h"
+#include <fstream>
+#include <iostream>
+#include <string>
+
+// PUBLIC VARIABLES ///////////////////////////////////////////////////
+
+int highscores;
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -242,11 +249,11 @@ void Asteroids::CreateGUI()
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mHighScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	// Set the horizontal alignment of the label to GUI_HALIGN_RIGHT
-	mHighScoreLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	//mHighScoreLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_RIGHT);
 	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> high_score_component
 		= static_pointer_cast<GUIComponent>(mHighScoreLabel);
-	mGameDisplay->GetContainer()->AddComponent(high_score_component, GLVector2f(0.0f, 1.0f));
+	mGameDisplay->GetContainer()->AddComponent(high_score_component, GLVector2f(0.6f, 1.0f));
 
 	// Create a new GUILabel and wrap it up in a shared_ptr
 	mLivesLabel = make_shared<GUILabel>("Lives: 3");
@@ -291,6 +298,44 @@ void Asteroids::OnScoreChanged(int score)
 	// Get the score message as a string
 	std::string score_msg = msg_stream.str();
 	mScoreLabel->SetText(score_msg);
+	// How to create and open a new file for the high-scores from the game.
+	char filename[] = "high_scores_file.txt";
+	fstream high_scores_file;
+	// This is to find out if the file already exists or not and/or if the file should be created.
+	if (!high_scores_file)
+	{
+		std::ofstream file("high_scores_file.txt");
+	}
+	// Because the file is created and now open, we want to close it because it is otherwise
+	// wasting memory whilst it is not in use.
+	high_scores_file.close();
+	// How to read from this high-scores file.
+	if (high_scores_file.is_open())
+	{
+		high_scores_file >> highscores;
+	}
+	high_scores_file.close();
+
+	if (score > highscores)
+	{
+		// Updates the high-score in the file we have just created
+		high_scores_file.open("high_scores_file.txt", std::fstream::out);
+		high_scores_file << score;
+		high_scores_file.close();
+		// Updates the high-score label in the actual game window
+		std::ostringstream msg_stream;
+		msg_stream << "High-Score: " << score;
+		std::string msg_high_score = msg_stream.str();
+		mHighScoreLabel->SetText(msg_high_score);
+	}
+	else
+	{
+		// Updates the high-score label in the actual game window
+		std::ostringstream msg_stream;
+		msg_stream << "High-Score: " << highscores;
+		std::string msg_high_score = msg_stream.str();
+		mHighScoreLabel->SetText(msg_high_score);
+	}
 }
 
 void Asteroids::OnPlayerKilled(int lives_left)
@@ -328,7 +373,3 @@ shared_ptr<GameObject> Asteroids::CreateExplosion()
 	explosion->Reset();
 	return explosion;
 }
-
-
-
-
