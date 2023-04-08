@@ -73,6 +73,9 @@ void Asteroids::Start()
 	//Create the GUI
 	CreateGUI();
 
+	// Displays the high-scores
+	DisplayHighScores(highscores);
+
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
 
@@ -245,7 +248,7 @@ void Asteroids::CreateGUI()
 	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
 
 	// Create a new GUILabel and wrap it up in a shared_ptr
-	mHighScoreLabel = make_shared<GUILabel>("High Score: 0");
+	mHighScoreLabel = make_shared<GUILabel>("High-Score: " );
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mHighScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	// Set the horizontal alignment of the label to GUI_HALIGN_RIGHT
@@ -304,24 +307,23 @@ void Asteroids::OnScoreChanged(int score)
 	// This is to find out if the file already exists or not and/or if the file should be created.
 	if (!high_scores_file)
 	{
-		std::ofstream file("high_scores_file.txt");
+		std::ofstream high_scores_file("high_scores_file.txt");
+	}
+	// How to read from this high-scores file.
+	std::fstream file("high_scores_file.txt");
+	if (file.is_open())
+	{
+		file >> highscores;
 	}
 	// Because the file is created and now open, we want to close it because it is otherwise
 	// wasting memory whilst it is not in use.
-	high_scores_file.close();
-	// How to read from this high-scores file.
-	if (high_scores_file.is_open())
-	{
-		high_scores_file >> highscores;
-	}
-	high_scores_file.close();
-
+	file.close();
 	if (score > highscores)
 	{
 		// Updates the high-score in the file we have just created
-		high_scores_file.open("high_scores_file.txt", std::fstream::out);
-		high_scores_file << score;
-		high_scores_file.close();
+		file.open("high_scores_file.txt", std::fstream::out);
+		file << score;
+		file.close();
 		// Updates the high-score label in the actual game window
 		std::ostringstream msg_stream;
 		msg_stream << "High-Score: " << score;
@@ -372,4 +374,14 @@ shared_ptr<GameObject> Asteroids::CreateExplosion()
 	explosion->SetSprite(explosion_sprite);
 	explosion->Reset();
 	return explosion;
+}
+
+void Asteroids::DisplayHighScores(int highscores)
+{
+	// Format the high-score message using a string-based stream
+	std::ostringstream msg_stream;
+	msg_stream << "High-Score: " << highscores;
+	// Gets the high-score message as a string
+	std::string msg_high_score = msg_stream.str();
+	mHighScoreLabel->SetText(msg_high_score);
 }
