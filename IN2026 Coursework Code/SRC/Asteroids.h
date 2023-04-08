@@ -50,8 +50,13 @@ public:
 	// Override the default implementation of ITimerListener ////////////////////
 	void OnTimer(int value);
 
+	const static uint AI_timer;
+
+	int start_screen;
+
 private:
 	shared_ptr<Spaceship> mSpaceship;
+	shared_ptr<Spaceship> mAISpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mHighScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
@@ -63,10 +68,10 @@ private:
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
+	shared_ptr<GameObject> CreateAISpaceship();
 	void CreateGUI();
 	void CreateAsteroids(const uint num_asteroids);
 	shared_ptr<GameObject> CreateExplosion();
-	void DisplayHighScores(int highscores);
 	
 	const static uint SHOW_GAME_OVER = 0;
 	const static uint START_NEXT_LEVEL = 1;

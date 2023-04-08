@@ -18,6 +18,8 @@
 // PUBLIC VARIABLES ///////////////////////////////////////////////////
 
 int highscores;
+const static uint AI_timer = 10;
+int start_screen = 1;
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -51,6 +53,9 @@ void Asteroids::Start()
 	// Add a score keeper to the game world
 	mGameWorld->AddListener(&mScoreKeeper);
 
+	// Adds an AI Spaceship to the game on initial load
+	// mGameWorld->AddObject(mAISpaceship);
+
 	// Add this class as a listener of the score keeper
 	mScoreKeeper.AddListener(thisPtr);
 
@@ -65,16 +70,11 @@ void Asteroids::Start()
 	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 
-	// Create a spaceship and add it to the world
-	// mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 
 	//Create the GUI
 	CreateGUI();
-
-	// Displays the high-scores
-	DisplayHighScores(highscores);
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -106,10 +106,11 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		if (is_b_pressed == 0)
 		{
 			mGameStartLabel->SetVisible(false);
+			// Create a spaceship and add it to the world
 			mGameWorld->AddObject((CreateSpaceship()));
 			is_b_pressed = 1;
+			start_screen = 0;
 			break;
-			
 		}
 	default:
 		break;
@@ -192,8 +193,37 @@ void Asteroids::OnTimer(int value)
 	if (value == SHOW_START_SCREEN)
 	{
 		mGameStartLabel->SetVisible(true);
+		//SetTimer(200, AI_timer);
 	}
-
+	/*if (start_screen == 1)
+	{
+		if (value == AI_timer)
+		{
+			int i;
+			i = rand() % 7;
+			if (i <= 3)
+			{
+				mAISpaceship->Shoot();
+			}
+			if (i == 4)
+			{
+				mAISpaceship->Rotate(90);
+			}
+			if (i == 5)
+			{
+				mAISpaceship->Rotate(-90);
+			}
+			if (i == 6)
+			{
+				mAISpaceship->Thrust(-10);
+			}
+			if (i == 7)
+			{
+				mAISpaceship->Thrust(10);
+			}
+			SetTimer(200, AI_timer);
+		}
+	}*/
 }
 
 // PROTECTED INSTANCE METHODS /////////////////////////////////////////////////
@@ -214,7 +244,25 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 	mSpaceship->Reset();
 	// Return the spaceship so it can be added to the world
 	return mSpaceship;
+}
 
+shared_ptr<GameObject> Asteroids::CreateAISpaceship()
+{
+	// Create a raw pointer to a spaceship that can be converted to
+	// shared_ptrs of different types because GameWorld implements IRefCount
+	mAISpaceship = make_shared<Spaceship>();
+	mAISpaceship->SetBoundingShape(make_shared<BoundingSphere>(mAISpaceship->GetThisPtr(), 4.0f));
+	shared_ptr<Shape> bullet_shape = make_shared<Shape>("bullet.shape");
+	mAISpaceship->SetBulletShape(bullet_shape);
+	Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
+	shared_ptr<Sprite> spaceship_sprite =
+		make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
+	mAISpaceship->SetSprite(spaceship_sprite);
+	mAISpaceship->SetScale(0.1f);
+	// Reset AIspaceship back to centre of the world
+	mAISpaceship->Reset();
+	// Return the AIspaceship so it can be added to the world
+	return mAISpaceship;
 }
 
 void Asteroids::CreateAsteroids(const uint num_asteroids)
@@ -248,7 +296,7 @@ void Asteroids::CreateGUI()
 	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
 
 	// Create a new GUILabel and wrap it up in a shared_ptr
-	mHighScoreLabel = make_shared<GUILabel>("High-Score: " );
+	mHighScoreLabel = make_shared<GUILabel>("High-Score: 0" );
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mHighScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	// Set the horizontal alignment of the label to GUI_HALIGN_RIGHT
@@ -374,14 +422,4 @@ shared_ptr<GameObject> Asteroids::CreateExplosion()
 	explosion->SetSprite(explosion_sprite);
 	explosion->Reset();
 	return explosion;
-}
-
-void Asteroids::DisplayHighScores(int highscores)
-{
-	// Format the high-score message using a string-based stream
-	std::ostringstream msg_stream;
-	msg_stream << "High-Score: " << highscores;
-	// Gets the high-score message as a string
-	std::string msg_high_score = msg_stream.str();
-	mHighScoreLabel->SetText(msg_high_score);
 }
