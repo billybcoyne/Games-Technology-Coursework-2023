@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <windows.h>
 
 class GameObject;
 class Spaceship;
@@ -50,13 +51,11 @@ public:
 	// Override the default implementation of ITimerListener ////////////////////
 	void OnTimer(int value);
 
-	const static uint AI_timer;
-
 	int start_screen;
 
 private:
 	shared_ptr<Spaceship> mSpaceship;
-	shared_ptr<Spaceship> mAISpaceship;
+	shared_ptr<Spaceship> AISpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mHighScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
@@ -77,6 +76,7 @@ private:
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;
 	const static uint SHOW_START_SCREEN = 3;
+	const static uint AI_TIMER = 4;
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;

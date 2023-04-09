@@ -14,11 +14,11 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <windows.h>
 
 // PUBLIC VARIABLES ///////////////////////////////////////////////////
 
 int highscores;
-const static uint AI_timer = 10;
 int start_screen = 1;
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
@@ -44,6 +44,9 @@ void Asteroids::Start()
 	// Create a shared pointer for the Asteroids game object - DO NOT REMOVE
 	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
 
+	// Adds an AI Spaceship to the game on initial load
+	// mGameWorld->AddObject((CreateAISpaceship()));
+
 	// Add this class as a listener of the game world
 	mGameWorld->AddListener(thisPtr.get());
 
@@ -52,9 +55,6 @@ void Asteroids::Start()
 
 	// Add a score keeper to the game world
 	mGameWorld->AddListener(&mScoreKeeper);
-
-	// Adds an AI Spaceship to the game on initial load
-	// mGameWorld->AddObject(mAISpaceship);
 
 	// Add this class as a listener of the score keeper
 	mScoreKeeper.AddListener(thisPtr);
@@ -193,37 +193,37 @@ void Asteroids::OnTimer(int value)
 	if (value == SHOW_START_SCREEN)
 	{
 		mGameStartLabel->SetVisible(true);
-		//SetTimer(200, AI_timer);
-	}
-	/*if (start_screen == 1)
+		SetTimer(200, AI_TIMER);
+		}
+	if (start_screen == 1)
 	{
-		if (value == AI_timer)
+		if (value == AI_TIMER)
 		{
 			int i;
 			i = rand() % 7;
 			if (i <= 3)
 			{
-				mAISpaceship->Shoot();
+				AISpaceship->Shoot();
 			}
 			if (i == 4)
 			{
-				mAISpaceship->Rotate(90);
+				AISpaceship->Rotate(90);
 			}
 			if (i == 5)
 			{
-				mAISpaceship->Rotate(-90);
+				AISpaceship->Rotate(-90);
 			}
 			if (i == 6)
 			{
-				mAISpaceship->Thrust(-10);
+				AISpaceship->Thrust(-10);
 			}
 			if (i == 7)
 			{
-				mAISpaceship->Thrust(10);
+				AISpaceship->Thrust(10);
 			}
-			SetTimer(200, AI_timer);
+			SetTimer(100, AI_TIMER);
 		}
-	}*/
+	}
 }
 
 // PROTECTED INSTANCE METHODS /////////////////////////////////////////////////
@@ -250,19 +250,19 @@ shared_ptr<GameObject> Asteroids::CreateAISpaceship()
 {
 	// Create a raw pointer to a spaceship that can be converted to
 	// shared_ptrs of different types because GameWorld implements IRefCount
-	mAISpaceship = make_shared<Spaceship>();
-	mAISpaceship->SetBoundingShape(make_shared<BoundingSphere>(mAISpaceship->GetThisPtr(), 4.0f));
+	AISpaceship = make_shared<Spaceship>();
+	AISpaceship->SetBoundingShape(make_shared<BoundingSphere>(AISpaceship->GetThisPtr(), 4.0f));
 	shared_ptr<Shape> bullet_shape = make_shared<Shape>("bullet.shape");
-	mAISpaceship->SetBulletShape(bullet_shape);
+	AISpaceship->SetBulletShape(bullet_shape);
 	Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
 	shared_ptr<Sprite> spaceship_sprite =
 		make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
-	mAISpaceship->SetSprite(spaceship_sprite);
-	mAISpaceship->SetScale(0.1f);
-	// Reset AIspaceship back to centre of the world
-	mAISpaceship->Reset();
-	// Return the AIspaceship so it can be added to the world
-	return mAISpaceship;
+	AISpaceship->SetSprite(spaceship_sprite);
+	AISpaceship->SetScale(0.1f);
+	// Reset spaceship back to centre of the world
+	AISpaceship->Reset();
+	// Return the spaceship so it can be added to the world
+	return AISpaceship;
 }
 
 void Asteroids::CreateAsteroids(const uint num_asteroids)
