@@ -45,7 +45,7 @@ void Asteroids::Start()
 	shared_ptr<Asteroids> thisPtr = shared_ptr<Asteroids>(this);
 
 	// Adds an AI Spaceship to the game on initial load
-	// mGameWorld->AddObject((CreateAISpaceship()));
+	// mGameWorld->AddObject(CreateAISpaceship());
 
 	// Add this class as a listener of the game world
 	mGameWorld->AddListener(thisPtr.get());
@@ -106,6 +106,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		if (is_b_pressed == 0)
 		{
 			mGameStartLabel->SetVisible(false);
+			mAsteroidsTitleLabel->SetVisible(false);
 			// Create a spaceship and add it to the world
 			mGameWorld->AddObject((CreateSpaceship()));
 			is_b_pressed = 1;
@@ -176,6 +177,7 @@ void Asteroids::OnTimer(int value)
 	{
 		mSpaceship->Reset();
 		mGameWorld->AddObject(mSpaceship);
+
 	}
 
 	if (value == START_NEXT_LEVEL)
@@ -193,6 +195,7 @@ void Asteroids::OnTimer(int value)
 	if (value == SHOW_START_SCREEN)
 	{
 		mGameStartLabel->SetVisible(true);
+		mAsteroidsTitleLabel->SetVisible(true);
 		SetTimer(200, AI_TIMER);
 		}
 	if (start_screen == 1)
@@ -339,6 +342,19 @@ void Asteroids::CreateGUI()
 	shared_ptr<GUIComponent> game_start_component
 		= static_pointer_cast<GUIComponent>(mGameStartLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_start_component, GLVector2f(0.5f, 0.5f));
+
+	// Create a new GUILabel and wrap it up in a shared_ptr
+	mAsteroidsTitleLabel = shared_ptr<GUILabel>(new GUILabel("ASTEROIDS!"));
+	// Set the horizontal alignment of the label to GUI_HALIGN_CENTER
+	mAsteroidsTitleLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	// Set the vertical alignment of the label to GUI_VALIGN_MIDDLE
+	mAsteroidsTitleLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	// Set the visibility of the label to true (visible)
+	mAsteroidsTitleLabel->SetVisible(true);
+	// Add the GUILabel to the GUIContainer  
+	shared_ptr<GUIComponent> asteroids_title_component
+		= static_pointer_cast<GUIComponent>(mAsteroidsTitleLabel);
+	mGameDisplay->GetContainer()->AddComponent(asteroids_title_component, GLVector2f(0.5f, 0.7f));
 }
 
 void Asteroids::OnScoreChanged(int score)
